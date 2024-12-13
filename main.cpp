@@ -45,7 +45,6 @@ int main() {
                 temp["author"] = "深圳大学";
                 temp["department"] = one_entry.get<std::string>("directory");
                 ret.push_back(temp);
-                //abc
             }
             res.set_content(ret.dump(json_dump_size), "application/json");
         });
