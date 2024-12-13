@@ -47,6 +47,7 @@ int main() {
                 ret.push_back(temp);
             }
             res.set_content(ret.dump(json_dump_size), "application/json");
+            //
         });
 
         auto host = global_setting->get<std::string>("host");
