@@ -1,0 +1,1 @@
+#define NEWS_SERVER_VERSION "@backend_news_server_VERSION@"

@@ -1,0 +1,6 @@
+{
+  "news_file_path": "resource/output.json",
+  "host": "localhost",
+  "port": 1145,
+  "return_json_dump_size": 0
+}
