@@ -23,6 +23,8 @@ extern std::string BAAS_PROJECT_DIR;
 
 extern std::string BAAS_CONFIG_DIR;
 
+extern std::string IMAGE_URL;
+
 class BAASUtil {
 
 public:

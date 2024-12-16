@@ -161,4 +161,16 @@ public:
 private:
     std::string message;
 };
+
+class SQLError: public std::exception {
+public:
+    explicit SQLError(const std::string& msg){
+        message = msg;
+    }
+    [[nodiscard]] const char* what() const noexcept {
+        return message.c_str();
+    }
+private:
+    std::string message;
+};
 #endif //BAAS_BAASEXCEPTIONS_H_

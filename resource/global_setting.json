@@ -2,5 +2,14 @@
   "news_file_path": "resource/output.json",
   "host": "localhost",
   "port": 1145,
-  "return_json_dump_size": 0
+  "return_json_dump_size": 0,
+  "image_url": "resource/image/Shenzhen_University_Logo.png",
+  "sql": {
+    "url": "tcp://172.30.207.108:3306",
+    "username": "root",
+    "password": "123456",
+    "database_name": "Alumni",
+    "last_insert_id": 0,
+    "news_table_name": "news"
+  }
 }

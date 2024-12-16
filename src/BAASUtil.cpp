@@ -22,6 +22,8 @@ string BAAS_PROJECT_DIR;
 
 string BAAS_OUTPUT_DIR;
 
+string IMAGE_URL;
+
 void BAASUtil::init_globals() {
 
     path curr = current_path();
@@ -45,6 +47,7 @@ void BAASUtil::init_globals() {
     global_setting = BAASGlobalSetting::getGlobalSetting();
 
     BAASGlobalLogger->BAASInfo(BAAS_PROJECT_DIR);
+
 }
 
 bool BAASUtil::initWinsock() {

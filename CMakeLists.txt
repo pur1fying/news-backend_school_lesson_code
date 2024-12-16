@@ -9,10 +9,21 @@ if (MSVC)
     add_compile_options(/W0)
 endif()
 
+link_directories(
+        ${CMAKE_CURRENT_LIST_DIR}/lib
+)
+
 include_directories(
         ${CMAKE_BINARY_DIR}
         ${CMAKE_CURRENT_LIST_DIR}/include
         ${CMAKE_CURRENT_LIST_DIR}/external
+)
+
+# Copy sql files
+file(
+        COPY
+        resource/sql_util
+        DESTINATION ${CMAKE_BINARY_DIR}/resource
 )
 
 file(
@@ -21,6 +32,7 @@ file(
         ${CMAKE_CURRENT_LIST_DIR}/src/*.cpp
 )
 
+# Copy news and config files
 file(
         GLOB
         NEWS_RESOURCE
@@ -48,8 +60,38 @@ configure_file(
         ${CMAKE_BINARY_DIR}/version.h
 )
 
+
+# move dll to exe folder
+file(
+        GLOB
+        DLLS
+        ${CMAKE_CURRENT_LIST_DIR}/dll/*.dll
+)
+
+file(
+        COPY
+        ${DLLS}
+        DESTINATION ${CMAKE_BINARY_DIR}
+)
+# image 
+file(
+        COPY
+        ${CMAKE_CURRENT_LIST_DIR}/resource/image
+        DESTINATION ${CMAKE_BINARY_DIR}/resource
+)
+
 add_executable(
         backend_news_server
         main.cpp
         ${SOURCES}
+)
+
+
+
+target_link_libraries(
+        backend_news_server
+        libcrypto
+        libssl
+        mysqlcppconn8
+        mysqlcppconn
 )

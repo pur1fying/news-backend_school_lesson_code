@@ -62,6 +62,14 @@ public:
         return get<int>(key, default_value);
     }
 
+    inline uint32_t getUInt(const std::string &key, uint32_t default_value=0) {
+        return get<uint32_t>(key, default_value);
+    }
+
+    inline size_t getSizeT(const std::string &key, size_t default_value=0) {
+        return get<size_t>(key, default_value);
+    }
+
     inline long getLong(const std::string &key, long default_value=0) {
         return get<long>(key, default_value);
     }
@@ -103,7 +111,13 @@ public:
             if(it == config.end()) {
                 return default_value;
             }
-            return *it;
+            else{
+                try{
+                    return *it;
+                } catch(std::exception &e) {
+                    return default_value;
+                }
+            }
         }
         try {
             return config.at(nlohmann::json::json_pointer(key));
