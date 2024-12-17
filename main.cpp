@@ -49,10 +49,11 @@ int main() {
             std::unique_ptr<sql::ResultSet> sql_ret = sql_query(conn, query_sql);
             long long t2 = BAASUtil::getCurrentTimeMS();
             BAASGlobalLogger->BAASInfo("Query Time: " + std::to_string(t2 - t1) + "ms");
-
+            int id;
             while(sql_ret->next()) {
-                temp["id"] = sql_ret->getInt("idx");
-                temp["url"] = nullptr;
+                id = sql_ret->getInt("idx");
+                temp["id"] = id;
+                temp["url"] = "https://www1.szu.edu.cn/board/view.asp?id=" + std::to_string(id);
                 temp["title"] = sql_ret->getString("title");
                 temp["date"] = sql_ret->getString("update_time");
                 temp["views"] = 0;
