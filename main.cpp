@@ -18,7 +18,6 @@ int main() {
 
         IMAGE_URL = global_setting->get<std::string>("image_url");
 
-        BAASConfig news_resource = BAASConfig(global_setting->get<std::string>("news_file_path"), (BAASLogger*)BAASGlobalLogger);
         int json_dump_size = global_setting->get<int>("return_json_dump_size", 0);
         httplib::Server svr;
 
@@ -29,7 +28,7 @@ int main() {
             res.set_header("Access-Control-Allow-Methods", "OPTIONS, GET, POST, HEAD");
         });
 
-        svr.Post("/get_latest_news", [&conn, &news_resource, &json_dump_size](const httplib::Request& req, httplib::Response& res) {
+        svr.Post("/get_latest_news", [&conn, &json_dump_size](const httplib::Request& req, httplib::Response& res) {
             res.set_header("Access-Control-Allow-Origin", req.get_header_value("Origin"));
             res.set_header("Allow", "GET, POST, HEAD, OPTIONS");
             res.set_header("Access-Control-Allow-Headers", "X-Requested-With, Content-Type, Accept, Origin, Authorization");
@@ -49,6 +48,10 @@ int main() {
             std::unique_ptr<sql::ResultSet> sql_ret = sql_query(conn, query_sql);
             long long t2 = BAASUtil::getCurrentTimeMS();
             BAASGlobalLogger->BAASInfo("Query Time: " + std::to_string(t2 - t1) + "ms");
+            if (sql_ret == nullptr) {
+                res.set_content(ret.dump(json_dump_size), "application/json");
+                return;
+            }
             int id;
             while(sql_ret->next()) {
                 id = sql_ret->getInt("idx");
@@ -63,6 +66,7 @@ int main() {
                 ret.push_back(temp);
             }
             res.set_content(ret.dump(json_dump_size), "application/json");
+            BAASGlobalLogger->BAASInfo("Get latest news " + ip + " count: " + std::to_string(count) + " offset: " + std::to_string(offset) + " done");
         });
 
         auto host = global_setting->get<std::string>("host");

@@ -12,6 +12,8 @@ std::string project_database_name;
 
 std::string news_table_name;
 
+std::mutex sql_lock;
+
 std::unique_ptr<sql::Connection> sql_auto_connect() {
     BAASGlobalLogger->hr("Sql Connect");
     const auto sql_url = global_setting->get<std::string>("/sql/url");
@@ -101,8 +103,13 @@ void init_news_data(std::unique_ptr<sql::Connection> &conn) {
         throw SQLError("SQL Error: " + std::string(e.what()));
     }
 
-    BAASConfig news_resource = BAASConfig(global_setting->get<std::string>("news_file_path"), (BAASLogger*)BAASGlobalLogger);
+    BAASConfig news_json= BAASConfig(global_setting->get<std::string>("news_file_path"), (BAASLogger*)BAASGlobalLogger);
+    auto generate_time = news_json.get<std::string>("/metadata/processed_time");
+    BAASGlobalLogger->BAASInfo("Latest News Generate Time: " + generate_time);
+    BAASConfig news_resource= BAASConfig(news_json.get<nlohmann::json>("/documents"), (BAASLogger*)BAASGlobalLogger);
+
     int last_time_max_idx = global_setting->get<int>("/sql/last_insert_id", 0);
+    BAASGlobalLogger->BAASInfo("Last Insert Id: " + std::to_string(last_time_max_idx));
     int this_time_max_idx = last_time_max_idx;
 
     for(int i = 0; i < news_resource.get_config().size(); i++) {
@@ -144,21 +151,44 @@ void init_news_data(std::unique_ptr<sql::Connection> &conn) {
             continue;
         }
     }
-
-    global_setting->update_and_save("/sql/last_insert_id", this_time_max_idx);
-    BAASGlobalLogger->BAASInfo("Max Insert Id: " + std::to_string(this_time_max_idx));
+    if (this_time_max_idx == last_time_max_idx) {
+        BAASGlobalLogger->BAASInfo("No New Entry Inserted");
+        return;
+    }
+    else {
+        global_setting->update_and_save("/sql/last_insert_id", this_time_max_idx);
+        BAASGlobalLogger->BAASInfo("Max Insert Id: " + std::to_string(this_time_max_idx));
+        try{
+            long long t1 = BAASUtil::getCurrentTimeMS();
+            std::unique_ptr<sql::ResultSet> res(stmt->executeQuery("SELECT COUNT(*) FROM news"));
+            res->next();
+            int count = res->getInt(1);
+            long long t2 = BAASUtil::getCurrentTimeMS();
+            BAASGlobalLogger->BAASInfo("Total News Entries: " + std::to_string(count) + " Query Time: " + std::to_string(t2 - t1) + "ms");
+        }
+        catch(sql::SQLException &e) {
+            BAASGlobalLogger->BAASError("SQL Error: " + std::string(e.what()));
+            throw SQLError("SQL Error: " + std::string(e.what()));
+        }
+    }
     auto end = BAASUtil::getCurrentTimeMS();
     BAASGlobalLogger->hr("Init News Data Time " + std::to_string(end - start) + "ms");
 }
 
 std::unique_ptr<sql::ResultSet> sql_query(std::unique_ptr<sql::Connection> &conn, const std::string &query_sql) {
-    std::unique_ptr<sql::Statement> stmt(conn->createStatement());
-    std::unique_ptr<sql::ResultSet> res(stmt->executeQuery(query_sql));
-    return res;
+    try{
+        sql_lock.lock();
+        std::unique_ptr<sql::Statement> stmt(conn->createStatement());
+        std::unique_ptr<sql::ResultSet> res(stmt->executeQuery(query_sql));
+        sql_lock.unlock();
+        return res;
+    }catch (sql::SQLException &e) {
+        BAASGlobalLogger->BAASError("SQL Error: " + std::string(e.what()));
+        sql_lock.unlock();
+        return nullptr;
+    }
 }
 
 void build_query_latest_news_sql(std::unique_ptr<sql::Connection> &conn, size_t count, size_t offset, std::string &query_sql) {
-    std::unique_ptr<sql::Statement> stmt(conn->createStatement());
-    stmt->execute("USE " + project_database_name);
     query_sql = "SELECT * FROM " + news_table_name + " ORDER BY create_time DESC LIMIT " + std::to_string(count) + " OFFSET " + std::to_string(offset);
 }

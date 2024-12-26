@@ -30,7 +30,7 @@ void BAASUtil::init_globals() {
 
     BAAS_PROJECT_DIR = curr.string();
 
-    BAAS_OUTPUT_DIR = BAAS_PROJECT_DIR + "\\output";
+    BAAS_OUTPUT_DIR = BAAS_PROJECT_DIR + R"(\output)";
 
     BAAS_CONFIG_DIR = BAAS_PROJECT_DIR + R"(\config)";
 

@@ -10,3 +10,5 @@ CREATE TABLE IF NOT EXISTS news (
         create_time DATETIME,
         update_time DATETIME
 ) DEFAULT CHARSET=utf8mb4;
+CREATE INDEX idx_news_create_time ON news(create_time);
+

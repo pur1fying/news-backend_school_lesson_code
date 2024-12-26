@@ -9,10 +9,13 @@
 #include <jdbc/mysql_connection.h>
 #include <jdbc/cppconn/statement.h>
 #include <jdbc/cppconn/resultset.h>
+#include <mutex>
 
 extern std::string project_database_name;
 
 extern std::string news_table_name;
+
+extern std::mutex sql_mutex;
 
 std::unique_ptr<sql::Connection> sql_auto_connect();
 
