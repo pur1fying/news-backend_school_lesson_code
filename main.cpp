@@ -1,4 +1,3 @@
-#pragma comment(lib, "ws2_32.lib")
 #include <BAASUtil.h>
 #include <httplib.h>
 #include <config/BAASGlobalSetting.h>
@@ -9,6 +8,7 @@ using namespace std;
 
 int main() {
     try{
+        system("chcp 65001");
         BAASUtil::init_globals();
         auto conn = sql_auto_connect();
 
@@ -77,7 +77,7 @@ int main() {
 
     }catch (const std::exception& e) {
         std::cerr << e.what() << std::endl;
+        system("pause");
     }
-
     return 0;
 }

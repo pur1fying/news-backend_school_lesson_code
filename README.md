@@ -23,7 +23,8 @@
 6."/sql/password" : 数据库密码
 <br>
 7."/sql/url" : 数据库地址
-
+<br>
+8."/sql/last_insert_id: 新闻表的最后插入id(用于每次启动时扫描新闻表，防止重复插入)
 ## API
 API 接口: /get_latest_news
 请求方法: POST
@@ -35,8 +36,7 @@ count（可选）：请求获取的新闻数量，默认值为 10。
 offset（可选）：新闻的起始偏移量，默认值为 0。
 
 示例请求体：
-`{
-"count": 10,
+`{"count": 10,
 "offset": 0 }`
 
 
@@ -65,3 +65,13 @@ department: 新闻文章所属的部门。
 日志:
 记录发起请求的客户端 IP 地址。
 记录请求中 count 和 offset 参数。
+
+测试：
+
+在控制台中输入以下两句
+
+locust -f load_test.py --master
+
+locust -f load_test.py --worker --master-host=127.0.0.1
+
+启动exe并在对应网页中设置worker数量，实测设置peak为1000人后端仍可正常运行，测试时时间损耗大部分在sql查询那一步。
